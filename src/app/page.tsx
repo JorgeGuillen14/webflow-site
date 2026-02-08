@@ -25,84 +25,12 @@ import {
   X,
   ChevronDown,
 } from "lucide-react"
+import SiteFooter from "@/components/ui/site-footer"
 
 gsap.registerPlugin(ScrollTrigger)
 
 // ─── Shared font style ──────────────────────────────────────
 const brandFont = { fontFamily: "var(--font-space-grotesk), sans-serif" }
-
-// ─── CUSTOM CURSOR ──────────────────────────────────────────
-function CustomCursor() {
-  const dotRef = useRef<HTMLDivElement>(null)
-  const ringRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const dot = dotRef.current
-    const ring = ringRef.current
-    if (!dot || !ring) return
-
-    const moveCursor = (e: MouseEvent) => {
-      gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0.15, ease: "power2.out" })
-      gsap.to(ring, { x: e.clientX, y: e.clientY, duration: 0.4, ease: "power2.out" })
-    }
-
-    const grow = () => {
-      gsap.to(ring, { scale: 2, borderColor: "rgba(255,255,255,0.6)", duration: 0.3 })
-      gsap.to(dot, { scale: 0.5, duration: 0.3 })
-    }
-    const shrink = () => {
-      gsap.to(ring, { scale: 1, borderColor: "rgba(255,255,255,0.25)", duration: 0.3 })
-      gsap.to(dot, { scale: 1, duration: 0.3 })
-    }
-
-    window.addEventListener("mousemove", moveCursor)
-
-    const interactives = document.querySelectorAll("a, button, [role='button']")
-    interactives.forEach((el) => {
-      el.addEventListener("mouseenter", grow)
-      el.addEventListener("mouseleave", shrink)
-    })
-
-    return () => {
-      window.removeEventListener("mousemove", moveCursor)
-      interactives.forEach((el) => {
-        el.removeEventListener("mouseenter", grow)
-        el.removeEventListener("mouseleave", shrink)
-      })
-    }
-  }, [])
-
-  return (
-    <>
-      <div
-        ref={dotRef}
-        className="fixed top-0 left-0 z-[9999] pointer-events-none hidden md:block"
-        style={{
-          width: 8,
-          height: 8,
-          marginLeft: -4,
-          marginTop: -4,
-          borderRadius: "50%",
-          background: "white",
-          boxShadow: "0 0 12px 4px rgba(255,255,255,0.5)",
-        }}
-      />
-      <div
-        ref={ringRef}
-        className="fixed top-0 left-0 z-[9998] pointer-events-none hidden md:block"
-        style={{
-          width: 40,
-          height: 40,
-          marginLeft: -20,
-          marginTop: -20,
-          borderRadius: "50%",
-          border: "1.5px solid rgba(255,255,255,0.25)",
-          background: "transparent",
-        }}
-      />
-    </>
-  )
-}
 
 // ─── MAGNETIC BUTTON ─────────────────────────────────────────
 function MagneticButton({
@@ -194,6 +122,16 @@ function useScrollAnimations() {
       }
     )
 
+    // ── Focus card inner content — subtle stagger (icon, title, desc, bullets)
+    gsap.fromTo(
+      ".gsap-focus-card-inner > *",
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power3.out",
+        scrollTrigger: { trigger: ".gsap-focus-card", start: "top 85%", toggleActions: "play none none none" }
+      }
+    )
+
     // ── How We Help heading — line draw + fade
     gsap.fromTo(
       ".gsap-help-heading",
@@ -204,13 +142,23 @@ function useScrollAnimations() {
       }
     )
 
-    // ── How We Help items — stagger from left
+    // ── How We Help cards — stagger in from below
     gsap.fromTo(
       ".gsap-help-item",
-      { opacity: 0, x: -30 },
+      { opacity: 0, y: 40, scale: 0.98 },
       {
-        opacity: 1, x: 0, duration: 0.5, stagger: 0.1, ease: "power3.out",
+        opacity: 1, y: 0, scale: 1, duration: 0.55, stagger: 0.12, ease: "power3.out",
         scrollTrigger: { trigger: ".gsap-help-items", start: "top 90%", toggleActions: "play none none none" }
+      }
+    )
+
+    // ── How We Help card inner — icon, title, desc stagger
+    gsap.fromTo(
+      ".gsap-help-card-inner > *",
+      { opacity: 0, y: 16 },
+      {
+        opacity: 1, y: 0, duration: 0.45, stagger: 0.08, ease: "power3.out",
+        scrollTrigger: { trigger: ".gsap-help-items", start: "top 85%", toggleActions: "play none none none" }
       }
     )
 
@@ -342,11 +290,14 @@ function Header() {
           <a href="#focus" className="text-sm text-neutral-300 hover:text-white transition-colors tracking-wide uppercase py-2" style={{ pointerEvents: "auto" }}>
             Focus
           </a>
+          <a href="/pricing" className="text-sm text-neutral-300 hover:text-white transition-colors tracking-wide uppercase py-2" style={{ pointerEvents: "auto" }}>
+            Pricing
+          </a>
           <a href="#contact" className="text-sm text-neutral-300 hover:text-white transition-colors tracking-wide uppercase py-2" style={{ pointerEvents: "auto" }}>
             Contact
           </a>
           <a
-            href="/kaptureops#demo"
+            href="/request-demo"
             className="px-6 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-neutral-200 transition-colors tracking-wide uppercase"
             style={{ pointerEvents: "auto" }}
           >
@@ -377,11 +328,14 @@ function Header() {
           <a href="/team" onClick={() => setMenuOpen(false)} className="text-sm text-neutral-300 hover:text-white transition-colors tracking-wide uppercase py-1">
             Team
           </a>
+          <a href="/pricing" onClick={() => setMenuOpen(false)} className="text-sm text-neutral-300 hover:text-white transition-colors tracking-wide uppercase py-1">
+            Pricing
+          </a>
           <a href="#contact" onClick={() => setMenuOpen(false)} className="text-sm text-neutral-300 hover:text-white transition-colors tracking-wide uppercase py-1">
             Contact
           </a>
           <a
-            href="/kaptureops#demo"
+            href="/request-demo"
             onClick={() => setMenuOpen(false)}
             className="px-6 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-neutral-200 transition-colors tracking-wide uppercase"
           >
@@ -562,10 +516,10 @@ function HeroSection() {
               </span>
             </h1>
             <p className="mt-5 text-neutral-400 max-w-lg text-[16px] leading-[1.7]">
-              Velarix helps government contractors cut capture time, navigate federal bureaucracy, and win more contracts. Our flagship platform KaptureOps AI replaces 6-8 fragmented tools with one intelligent system that automates compliance, proposals, teaming partner selection, and personnel matching.
+              Velarix built the operating system for government contractors. KaptureOps AI brings capture, compliance, proposals, finance, and teaming into one FedRAMP-ready platform so contractors can move faster, stay compliant, and win more work.
             </p>
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
-              <a href="/kaptureops#demo">
+              <a href="/request-demo">
                 <MagneticButton className="px-8 py-3 rounded-full bg-white text-black font-semibold text-sm hover:bg-neutral-200 transition-colors flex items-center gap-2 tracking-wide uppercase">
                   Request a Demo <ArrowRight className="h-4 w-4" />
                 </MagneticButton>
@@ -633,9 +587,9 @@ function FocusSection() {
   return (
     <section id="focus" className="relative w-full px-6 md:px-12 lg:px-20 pt-10 pb-12 md:pt-14 md:pb-16">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
-      <div className="max-w-6xl mx-auto relative">
-        <div className="gsap-focus-heading mb-10">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-neutral-500 mb-3 font-medium">
+      <div className="max-w-6xl mx-auto relative text-center">
+        <div className="gsap-focus-heading mb-8">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-neutral-500 mb-2 font-medium">
             Core Disciplines
           </p>
           <h2 className="text-2xl md:text-4xl font-bold tracking-[-0.02em] text-white">
@@ -643,9 +597,9 @@ function FocusSection() {
           </h2>
         </div>
 
-        <ul className="grid grid-cols-1 grid-rows-none gap-4 md:grid-cols-3 lg:gap-4">
+        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 justify-items-center">
           {pillars.map((p) => (
-            <li key={p.title} className="min-h-[14rem] list-none gsap-focus-card">
+            <li key={p.title} className="w-full max-w-md min-h-[14rem] list-none gsap-focus-card">
               <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
                 <GlowingEffect
                   spread={40}
@@ -655,27 +609,25 @@ function FocusSection() {
                   inactiveZone={0.01}
                   borderWidth={3}
                 />
-                <div className="relative flex h-full flex-col justify-between gap-6 overflow-hidden rounded-xl border-[0.75px] bg-black/70 backdrop-blur-md p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-6">
-                  <div className="relative flex flex-1 flex-col justify-between gap-3">
-                    <div className="w-fit rounded-lg border-[0.75px] border-border bg-white/5 p-2">
+                <div className="relative flex h-full flex-col items-center text-center gap-4 overflow-hidden rounded-xl border-[0.75px] bg-black/70 backdrop-blur-md p-5 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)] md:p-5">
+                  <div className="gsap-focus-card-inner flex flex-col items-center gap-4 w-full">
+                    <div className="w-fit rounded-lg border-[0.75px] border-border bg-white/5 p-2 shrink-0">
                       {p.icon}
                     </div>
-                    <div className="space-y-3">
-                      <h3 className="pt-0.5 text-xl leading-[1.375rem] font-semibold tracking-[-0.04em] md:text-2xl md:leading-[1.875rem] text-balance text-foreground">
-                        {p.title}
-                      </h3>
-                      <p className="text-sm leading-[1.125rem] md:text-base md:leading-[1.375rem] text-muted-foreground">
-                        {p.desc}
-                      </p>
-                      <ul className="space-y-2 pt-1">
-                        {p.bullets.map((b) => (
-                          <li key={b} className="flex items-start gap-2.5 text-[13px] text-neutral-500 leading-[1.5]">
-                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-white/20 mt-1.5 shrink-0" />
-                            {b}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    <h3 className="text-xl leading-[1.375rem] font-semibold tracking-[-0.04em] md:text-2xl md:leading-[1.875rem] text-balance text-foreground">
+                      {p.title}
+                    </h3>
+                    <p className="text-sm leading-[1.125rem] md:text-base md:leading-[1.375rem] text-muted-foreground">
+                      {p.desc}
+                    </p>
+                    <ul className="space-y-2 w-full text-left">
+                      {p.bullets.map((b) => (
+                        <li key={b} className="flex items-start gap-2.5 text-[13px] text-neutral-500 leading-[1.5]">
+                          <span className="inline-block w-1.5 h-1.5 rounded-full bg-white/20 mt-1.5 shrink-0" />
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -708,26 +660,26 @@ function HowWeHelpStrip() {
     },
     {
       label: "Move Faster",
-      line: "Cut capture cycles from months to weeks. Automate SAM.gov monitoring, compliance tracking, and invoice processing.",
+      line: "Cut capture cycles from months to weeks. Use KaptureOps AI to automate opportunity monitoring, proposal workflows, compliance tracking, and much more.",
       icon: <Rocket className="h-4 w-4" />,
     },
   ]
 
   return (
-    <section className="relative w-full px-6 md:px-12 lg:px-20 pt-6 pb-10 md:pt-8 md:pb-14">
+    <section className="relative w-full px-6 md:px-12 lg:px-20 pt-4 pb-8 md:pt-6 md:pb-10">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
-      <div className="max-w-6xl mx-auto relative">
-        <div className="gsap-help-heading mb-8">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-neutral-500 mb-3 font-medium">
+      <div className="max-w-6xl mx-auto relative text-center">
+        <div className="gsap-help-heading mb-5">
+          <p className="text-[11px] uppercase tracking-[0.25em] text-neutral-500 mb-1.5 font-medium">
             How We Help
           </p>
-          <div className="h-px w-full bg-white/[0.06]" />
+          <div className="h-px max-w-xl mx-auto bg-white/[0.06]" />
         </div>
 
-        <ul className="gsap-help-items grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-4">
+        <ul className="gsap-help-items grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 items-stretch">
           {items.map((item) => (
-            <li key={item.label} className="min-h-[10rem] list-none gsap-help-item">
-              <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
+            <li key={item.label} className="list-none gsap-help-item flex">
+              <div className="relative w-full rounded-[1.25rem] border-[0.75px] border-border p-1.5 md:p-2 flex flex-col">
                 <GlowingEffect
                   spread={40}
                   glow={true}
@@ -736,19 +688,17 @@ function HowWeHelpStrip() {
                   inactiveZone={0.01}
                   borderWidth={3}
                 />
-                <div className="relative flex h-full flex-col justify-between gap-4 overflow-hidden rounded-xl border-[0.75px] bg-black/70 backdrop-blur-md p-6 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)]">
-                  <div className="relative flex flex-1 flex-col justify-between gap-3">
-                    <div className="w-fit rounded-lg border-[0.75px] border-border bg-white/5 p-2">
+                <div className="relative flex flex-1 flex-col items-center text-center gap-3 overflow-hidden rounded-xl border-[0.75px] bg-black/70 backdrop-blur-md p-4 shadow-sm dark:shadow-[0px_0px_27px_0px_rgba(45,45,45,0.3)]">
+                  <div className="gsap-help-card-inner flex flex-col items-center gap-3 w-full flex-1 min-h-0">
+                    <div className="w-fit rounded-lg border-[0.75px] border-border bg-white/5 p-1.5 shrink-0">
                       {item.icon}
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="pt-0.5 text-lg leading-[1.375rem] font-semibold tracking-[-0.04em] md:text-xl md:leading-[1.5rem] text-foreground uppercase">
-                        {item.label}
-                      </h3>
-                      <p className="text-sm leading-[1.125rem] md:text-base md:leading-[1.375rem] text-muted-foreground">
-                        {item.line}
-                      </p>
-                    </div>
+                    <h3 className="text-base font-semibold tracking-[-0.02em] md:text-lg text-foreground uppercase leading-tight">
+                      {item.label}
+                    </h3>
+                    <p className="text-[13px] leading-[1.5] md:text-sm text-muted-foreground">
+                      {item.line}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1080,30 +1030,39 @@ function GovConStats() {
 // ─── COMPACT FINAL CTA ──────────────────────────────────────
 function FinalCTA() {
   return (
-    <section id="contact" className="relative w-full px-6 md:px-12 lg:px-20 pt-4 pb-16 md:pt-6 md:pb-24">
+    <section id="contact" className="relative w-full px-6 md:px-12 lg:px-20 pt-4 pb-12 md:pt-6 md:pb-16">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
       <div className="max-w-6xl mx-auto relative">
-        <div className="h-px w-full bg-white/[0.06] mb-10" />
-        <div className="gsap-final-cta max-w-2xl">
-          <h2 className="text-2xl md:text-4xl font-bold tracking-[-0.02em] text-white leading-[1.1] mb-2">
-            Decide faster. Scale further.
-          </h2>
-          <p className="text-lg md:text-xl font-semibold tracking-[-0.01em] text-neutral-500 mb-4" style={{ fontFamily: "'Courier New', 'SF Mono', 'Fira Code', monospace" }}>
-            Velarix. The System Behind GovCon Winners.
-          </p>
-          <p className="text-[15px] text-neutral-500 leading-[1.6] mb-8 max-w-lg">
-            If your organization operates in regulated environments and needs operational systems that perform, we should talk.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <a href="/kaptureops#demo">
-              <MagneticButton className="px-8 py-3 rounded-full bg-white text-black font-semibold text-sm hover:bg-neutral-200 transition-colors flex items-center gap-2 tracking-wide uppercase">
-                Request a Demo <ArrowRight className="h-4 w-4" />
-              </MagneticButton>
-            </a>
-            <a href="mailto:contact@velarix.com">
-              <MagneticButton className="px-8 py-3 rounded-full border border-neutral-700 text-white font-medium text-sm hover:bg-white/5 transition-colors tracking-wide uppercase">
-                Contact Velarix
-              </MagneticButton>
+        <div className="gsap-final-cta flex flex-col md:flex-row md:items-center md:justify-between gap-8 md:gap-12">
+          {/* Left — headline + tagline */}
+          <div className="flex-1 min-w-0">
+            <h2 className="text-2xl md:text-4xl font-bold tracking-[-0.02em] text-white leading-[1.1] mb-2">
+              Decide faster. Scale further.
+            </h2>
+            <p className="text-lg md:text-xl font-semibold tracking-[-0.01em] text-neutral-500 mb-4" style={{ fontFamily: "'Courier New', 'SF Mono', 'Fira Code', monospace" }}>
+              Velarix. The System Behind GovCon Winners.
+            </p>
+            <p className="text-[15px] text-neutral-500 leading-[1.6] max-w-lg">
+              If your organization operates in regulated environments and needs operational systems that perform, we should talk.
+            </p>
+          </div>
+
+          {/* Right — CTA buttons + contact email */}
+          <div className="flex flex-col items-start md:items-end gap-4 shrink-0">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a href="/request-demo">
+                <MagneticButton className="px-8 py-3 rounded-full bg-white text-black font-semibold text-sm hover:bg-neutral-200 transition-colors flex items-center gap-2 tracking-wide uppercase">
+                  Request a Demo <ArrowRight className="h-4 w-4" />
+                </MagneticButton>
+              </a>
+              <a href="mailto:contact@velarix.com">
+                <MagneticButton className="px-8 py-3 rounded-full border border-neutral-700 text-white font-medium text-sm hover:bg-white/5 transition-colors tracking-wide uppercase">
+                  Contact Velarix
+                </MagneticButton>
+              </a>
+            </div>
+            <a href="mailto:contact@velarix.com" className="text-[13px] text-neutral-600 hover:text-neutral-400 transition-colors tracking-wide">
+              contact@velarix.com
             </a>
           </div>
         </div>
@@ -1111,6 +1070,7 @@ function FinalCTA() {
     </section>
   )
 }
+
 
 /* =====================================================================
    OLD PAGE RENDER (commented out — uncomment to revert)
@@ -1120,7 +1080,6 @@ export default function Home_OLD() {
   return (
     <main className="dark min-h-screen bg-black relative cursor-none md:cursor-none">
       <ShaderBackground />
-      <CustomCursor />
       <Header />
       <div className="relative z-10 pt-20">
         <HeroSection />
@@ -1143,7 +1102,6 @@ export default function Home() {
   return (
     <main className="dark min-h-screen bg-black relative cursor-none md:cursor-none">
       <ShaderBackground />
-      <CustomCursor />
       <Header />
       <div className="relative z-10 pt-20">
         <HeroSection />
@@ -1152,6 +1110,7 @@ export default function Home() {
         <KaptureOpsCallout />
         <GovConStats />
         <FinalCTA />
+        <SiteFooter />
       </div>
     </main>
   )
