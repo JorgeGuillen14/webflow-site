@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 // Force project root so Next doesn't use a parent directory (e.g. lockfile in home dir)
 const root = process.cwd();

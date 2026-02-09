@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { MeshGradient } from "@paper-design/shaders-react"
-import { ArrowRight, ChevronDown, Search, FileText, Users, Shield, DollarSign, Receipt, Layers, UserCheck, BarChart3 } from "lucide-react"
+import { ArrowRight, Search, FileText, Users, Shield, DollarSign, Receipt, Layers, UserCheck, BarChart3 } from "lucide-react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import SiteHeader from "@/components/ui/site-header"
