@@ -250,11 +250,11 @@ export function RadialOrbitalTimeline({
               const dy = positions[i].y - positions[j].y
               const dist = Math.sqrt(dx * dx + dy * dy)
 
-              // Proximity-based opacity: closer = brighter
+              // Proximity-based opacity: closer = brighter (loud connection lines)
               const maxDist = 350
-              let alpha = Math.max(0, 1 - dist / maxDist) * 0.06
+              let alpha = Math.max(0, 1 - dist / maxDist) * 0.22
 
-              // Brighten connections for selected node
+              // Brighten connections for selected node — very visible
               const selId = selectedIdRef.current
               if (selId !== null) {
                 const iId = timelineData[i]?.id
@@ -264,9 +264,9 @@ export function RadialOrbitalTimeline({
                   (iId === selId && pids.includes(jId)) ||
                   (jId === selId && pids.includes(iId))
                 ) {
-                  alpha = 0.25
+                  alpha = 0.95
                 } else if (iId === selId || jId === selId) {
-                  alpha = 0.12
+                  alpha = 0.5
                 }
               }
 
@@ -375,13 +375,13 @@ export function RadialOrbitalTimeline({
             y1="50%"
             x2="50%"
             y2="50%"
-            stroke="rgba(255,255,255,0.5)"
-            strokeOpacity="0.03"
-            strokeWidth="0.5"
+            stroke="rgba(255,255,255,0.9)"
+            strokeOpacity="0.2"
+            strokeWidth="1"
             strokeDasharray="2 8"
           />
         ))}
-        {/* Node ↔ node proximity lines */}
+        {/* Node ↔ node proximity lines — bright so connections pop */}
         {connectionPairs.map((pair, idx) => (
           <line
             key={`conn-${idx}`}
@@ -390,9 +390,9 @@ export function RadialOrbitalTimeline({
             y1="50%"
             x2="50%"
             y2="50%"
-            stroke="rgba(255,255,255,0.5)"
+            stroke="rgba(255,255,255,0.95)"
             strokeOpacity="0"
-            strokeWidth="0.5"
+            strokeWidth="1.5"
           />
         ))}
       </svg>
@@ -463,15 +463,15 @@ export function RadialOrbitalTimeline({
                 />
               )}
 
-              {/* Pulsing ring for related nodes */}
+              {/* Pulsing ring for related nodes — bright */}
               {isPulsing && (
                 <div
-                  className="absolute -inset-2 rounded-full animate-ping opacity-20"
-                  style={{ borderWidth: "1.5px", borderColor: color, borderStyle: "solid" }}
+                  className="absolute -inset-2 rounded-full animate-ping opacity-50"
+                  style={{ borderWidth: "2px", borderColor: color, borderStyle: "solid", boxShadow: `0 0 12px ${color}` }}
                 />
               )}
 
-              {/* Node circle */}
+              {/* Node circle — loud colors, strong glow */}
               <div
                 className={cn(
                   "w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center border-2 relative transition-all duration-300",
@@ -480,24 +480,24 @@ export function RadialOrbitalTimeline({
                 )}
                 style={{
                   background: isActive
-                    ? `linear-gradient(135deg, ${color}, ${color}cc)`
+                    ? `linear-gradient(135deg, ${color}, ${color}ee)`
                     : isPulsing
-                    ? `${color}25`
-                    : `radial-gradient(circle at 35% 35%, rgba(255,255,255,0.08), rgba(0,0,0,0.6))`,
+                    ? `${color}40`
+                    : `radial-gradient(circle at 35% 35%, ${color}30, rgba(0,0,0,0.7))`,
                   borderColor: isActive
                     ? color
                     : isPulsing
-                    ? `${color}55`
+                    ? `${color}99`
                     : isHovered
-                    ? `${color}55`
-                    : `${color}18`,
+                    ? `${color}99`
+                    : `${color}50`,
                   boxShadow: isActive
-                    ? `0 0 30px ${color}50, 0 0 60px ${color}20, inset 0 0 15px ${color}30`
+                    ? `0 0 40px ${color}99, 0 0 80px ${color}50, inset 0 0 20px ${color}50`
                     : isPulsing
-                    ? `0 0 25px ${color}25`
+                    ? `0 0 35px ${color}60, 0 0 60px ${color}30`
                     : isHovered
-                    ? `0 0 20px ${color}20, 0 0 40px ${color}08`
-                    : `0 0 10px ${color}06`,
+                    ? `0 0 28px ${color}50, 0 0 56px ${color}25`
+                    : `0 0 16px ${color}30`,
                   backdropFilter: "blur(4px)",
                 }}
               >
@@ -558,10 +558,10 @@ export function RadialOrbitalTimeline({
         )
       })}
 
-      {/* ── Detail card ── */}
+      {/* ── Detail card: solid so it doesn’t obscure orbs, vibrant accents ── */}
       {selectedItem && (
-        <div className="absolute bottom-0 left-0 right-0 z-30 px-4 md:px-0 md:left-1/2 md:-translate-x-1/2 md:bottom-4 md:w-[500px]">
-          <Card className="border-white/10 bg-black/85 backdrop-blur-xl text-white shadow-2xl">
+        <div className="absolute bottom-0 left-0 right-0 z-30 px-4 md:px-0 md:left-1/2 md:-translate-x-1/2 md:bottom-4 md:w-[500px] pointer-events-auto">
+          <Card className="border-2 border-white/25 bg-black text-white shadow-2xl shadow-black/60">
             <CardHeader className="pb-3 relative">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -569,7 +569,7 @@ export function RadialOrbitalTimeline({
                     className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg"
                     style={{
                       backgroundColor: selectedItem.color,
-                      boxShadow: `0 0 20px ${selectedItem.color}40`,
+                      boxShadow: `0 0 24px ${selectedItem.color}, 0 0 48px ${selectedItem.color}80`,
                     }}
                   >
                     <selectedItem.icon size={18} className="text-white" />
@@ -579,10 +579,11 @@ export function RadialOrbitalTimeline({
                       {selectedItem.title}
                     </CardTitle>
                     <Badge
-                      className="mt-1 text-[10px] uppercase tracking-[0.1em] border-white/10"
+                      className="mt-1 text-[10px] uppercase tracking-[0.1em] border-0 font-semibold"
                       style={{
-                        backgroundColor: `${selectedItem.color}15`,
-                        color: selectedItem.color,
+                        backgroundColor: `${selectedItem.color}55`,
+                        color: "white",
+                        boxShadow: `0 0 12px ${selectedItem.color}60`,
                       }}
                     >
                       {selectedItem.category}
@@ -600,13 +601,13 @@ export function RadialOrbitalTimeline({
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-neutral-400 leading-relaxed">
+              <p className="text-sm text-neutral-300 leading-relaxed">
                 {selectedItem.content}
               </p>
 
               {selectedItem.relatedIds.length > 0 && (
-                <div className="pt-2 border-t border-white/[0.06]">
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-neutral-600 mb-2">
+                <div className="pt-2 border-t border-white/15">
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-neutral-400 mb-2">
                     Connected Modules
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -617,7 +618,10 @@ export function RadialOrbitalTimeline({
                         <button
                           key={rid}
                           onClick={() => navigateToRelated(rid)}
-                          className="text-[11px] text-neutral-400 hover:text-white border border-white/10 hover:border-white/30 rounded-full px-2.5 py-1 transition-colors flex items-center gap-1"
+                          className="text-[11px] text-white/90 hover:text-white border border-white/25 hover:border-white/50 rounded-full px-2.5 py-1 transition-colors flex items-center gap-1"
+                          style={{
+                            boxShadow: `0 0 8px ${related.color}40`,
+                          }}
                         >
                           {related.title}
                           <ArrowRight size={9} />
