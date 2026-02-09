@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://velarix.com",
+    url: "https://velarix.ai",
     siteName: "Velarix",
     title: "Velarix | The System Behind GovCon Winners",
     description:
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  metadataBase: new URL("https://velarix.com"),
+  metadataBase: new URL("https://velarix.ai"),
 };
 
 export default function RootLayout({
