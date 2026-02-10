@@ -11,9 +11,6 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowRight, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-
-gsap.registerPlugin(ScrollTrigger)
 
 export interface TimelineItem {
   id: number
@@ -185,23 +182,6 @@ export function RadialOrbitalTimeline({
     resizeCanvas()
     window.addEventListener("resize", resizeCanvas)
 
-    // When the left column shrinks (card open), container resizes — update canvas + particles so diagram stays in sync
-    const resizeObserver = new ResizeObserver(() => {
-      const container = containerRef.current
-      if (!container) return
-      const rect = container.getBoundingClientRect()
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      canvas.width = rect.width * dpr
-      canvas.height = rect.height * dpr
-      canvas.style.width = `${rect.width}px`
-      canvas.style.height = `${rect.height}px`
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      sizeRef.current = { w: rect.width, h: rect.height }
-      const pCount = isMobileRef.current ? 18 : 45
-      particlesRef.current = createParticles(pCount, rect.width, rect.height, colors)
-    })
-    resizeObserver.observe(containerRef.current!)
-
     const tick = () => {
       if (!mountedRef.current) return
       const paused = isPausedRef.current
@@ -301,11 +281,13 @@ export function RadialOrbitalTimeline({
           }
         }
 
-        // Center → node lines
+        // Center → node lines (use pixel coords for alignment)
         const centerLines = svgRef.current.querySelectorAll<SVGLineElement>(".center-line")
         positions.forEach((pos, i) => {
           const cl = centerLines[i]
           if (cl) {
+            cl.setAttribute("x1", String(cx))
+            cl.setAttribute("y1", String(cy))
             cl.setAttribute("x2", String(cx + pos.x))
             cl.setAttribute("y2", String(cy + pos.y))
           }
@@ -320,7 +302,6 @@ export function RadialOrbitalTimeline({
     return () => {
       cancelAnimationFrame(animRef.current)
       window.removeEventListener("resize", resizeCanvas)
-      resizeObserver.disconnect()
     }
   }, [colors, computePosition, timelineData])
 
@@ -359,15 +340,6 @@ export function RadialOrbitalTimeline({
     [timelineData, handleItemClick]
   )
 
-  // ─── GSAP: detail card entrance ──
-  useEffect(() => {
-    if (!selectedItem || !cardRef.current) return
-    gsap.fromTo(
-      cardRef.current,
-      { opacity: 0, x: 40, scale: 0.95 },
-      { opacity: 1, x: 0, scale: 1, duration: 0.55, ease: "power3.out" }
-    )
-  }, [selectedItem])
 
   // ─── CONNECTION LINE PAIRS (for SVG) ──────────────────
   const connectionPairs = useMemo(() => {
@@ -382,11 +354,8 @@ export function RadialOrbitalTimeline({
 
   return (
     <div className="w-full flex flex-col md:flex-row items-center md:items-stretch gap-6 md:gap-10" style={brandFont}>
-      {/* ── Left: Orb visualization area (never covered by card) ── */}
-      <div className={cn(
-        "w-full min-w-0 transition-all duration-500",
-        selectedItem ? "md:flex-1 md:min-w-0" : "md:flex-none md:w-full"
-      )}>
+      {/* ── Left: Orb visualization (fixed size, no layout shift) ── */}
+      <div className="w-full min-w-0 md:flex-1">
         <div
           ref={containerRef}
           className="relative w-full h-[500px] md:h-[700px] overflow-hidden"
@@ -408,10 +377,10 @@ export function RadialOrbitalTimeline({
               <line
                 key={`cl-${i}`}
                 className="center-line"
-                x1="50%"
-                y1="50%"
-                x2="50%"
-                y2="50%"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="0"
                 stroke="rgba(255,255,255,0.9)"
                 strokeOpacity="0.2"
                 strokeWidth="1"
@@ -459,7 +428,7 @@ export function RadialOrbitalTimeline({
 
               {/* Core + K.O.A acronym */}
               <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-white/20 via-white/10 to-white/5 border border-white/15 flex items-center justify-center backdrop-blur-sm">
-                <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white/80 animate-ping opacity-20" />
+                <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white/80 opacity-20" />
                 <span className="absolute text-[10px] md:text-xs font-bold tracking-[0.2em] text-white/90">
                   K.O.A
                 </span>
@@ -488,23 +457,23 @@ export function RadialOrbitalTimeline({
                   onMouseEnter={() => setHoveredId(item.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   className={cn(
-                    "group relative flex flex-col items-center gap-2 cursor-pointer transition-[filter] duration-300",
-                    isDimmed && "brightness-[0.25] blur-[0.5px]"
+                    "group relative flex flex-col items-center gap-2 cursor-pointer transition-[filter] duration-500 ease-out",
+                    isDimmed && "brightness-[0.35]"
                   )}
                 >
-                  {/* Active glow burst — bold, not pastel */}
+                  {/* Active glow burst */}
                   {isActive && (
                     <div
-                      className="absolute -inset-6 rounded-full blur-2xl opacity-70 animate-pulse"
+                      className="absolute -inset-6 rounded-full blur-2xl opacity-60 animate-pulse"
                       style={{ backgroundColor: color }}
                     />
                   )}
 
-                  {/* Pulsing ring for related nodes — bold */}
+                  {/* Pulsing ring for related nodes */}
                   {isPulsing && (
                     <div
-                      className="absolute -inset-2 rounded-full animate-ping opacity-80"
-                      style={{ borderWidth: "2px", borderColor: color, borderStyle: "solid", boxShadow: `0 0 16px ${color}, 0 0 32px ${color}99` }}
+                      className="absolute -inset-2 rounded-full animate-ping opacity-70"
+                      style={{ borderWidth: "2px", borderColor: color, borderStyle: "solid", boxShadow: `0 0 12px ${color}` }}
                     />
                   )}
 
@@ -587,15 +556,12 @@ export function RadialOrbitalTimeline({
         </div>
       </div>
 
-      {/* ── Right: Detail panel — always beside diagram, never over orbs ── */}
-      <div className={cn(
-        "w-full flex items-center justify-center transition-all duration-500 min-h-[200px] md:min-h-0 md:shrink-0",
-        selectedItem ? "md:w-[380px] md:flex-none" : "md:w-0 md:overflow-hidden md:opacity-0 md:min-w-0"
-      )}>
+      {/* ── Right: Detail panel — fixed width, smooth content fade ── */}
+      <div className="w-full flex items-center justify-center min-h-[200px] md:min-h-[500px] md:w-[380px] md:shrink-0 md:flex-none">
         {selectedItem ? (
           <div
             ref={cardRef}
-            className="w-full px-4 md:px-6 md:py-8 flex items-start justify-center"
+            className="w-full px-4 md:px-6 md:py-8 flex items-start justify-center orb-card-fade-in"
             aria-label="Module details"
             style={brandFont}
           >
@@ -684,7 +650,7 @@ export function RadialOrbitalTimeline({
         )}
       </div>
 
-      {/* ── CSS keyframes (global style tag) ── */}
+      {/* ── CSS keyframes ── */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes orbital-spin {
           from { transform: rotate(0deg); }
@@ -693,6 +659,13 @@ export function RadialOrbitalTimeline({
         @keyframes orbital-breathe {
           0%, 100% { transform: scale(1); opacity: 0.06; }
           50% { transform: scale(1.08); opacity: 0.1; }
+        }
+        .orb-card-fade-in {
+          animation: orb-card-fade 0.35s ease-out forwards;
+        }
+        @keyframes orb-card-fade {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
       `}} />
     </div>

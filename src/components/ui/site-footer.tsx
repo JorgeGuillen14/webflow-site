@@ -44,26 +44,14 @@ export default function SiteFooter() {
             </Link>
           </nav>
 
-          {/* Social */}
+          {/* Social — not clickable (handles TBD) */}
           <div className="flex items-center gap-3">
-            <a
-              href="https://www.linkedin.com/company/velarix"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-neutral-600 hover:text-white transition-colors"
-              aria-label="Velarix on LinkedIn"
-            >
+            <span className="text-neutral-600 cursor-default pointer-events-none" aria-hidden="true">
               <Linkedin className="h-4 w-4" />
-            </a>
-            <a
-              href="https://x.com/velarix"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-neutral-600 hover:text-white transition-colors"
-              aria-label="Velarix on X"
-            >
+            </span>
+            <span className="text-neutral-600 cursor-default pointer-events-none" aria-hidden="true">
               <Twitter className="h-4 w-4" />
-            </a>
+            </span>
           </div>
         </div>
 

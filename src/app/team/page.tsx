@@ -42,7 +42,7 @@ const TEAM: TeamMember[] = [
     image: '/team/jorge-guillen.png',
     imageStyle: { objectPosition: "center 25%", transform: "scale(1.25)" },
     bio: 'Operational strategist focused on scaling technology platforms for regulated industries. Jorge oversees product delivery, partnerships, and day-to-day operations across Velarix.',
-    linkedin: 'https://www.linkedin.com/in/jorgeguillen',
+    linkedin: 'https://www.linkedin.com/in/jorgeguillen1/',
   },
   {
     id: '03',
@@ -123,18 +123,30 @@ function BioPopup({ member, onClose }: { member: TeamMember; onClose: () => void
         {/* Bio */}
         <p className="text-sm text-neutral-400 leading-relaxed text-center mb-6">{member.bio}</p>
 
-        {/* Socials */}
+        {/* Socials — only Jorge Guillen's links are clickable */}
         {(member.linkedin || member.twitter) && (
           <div className="flex items-center justify-center gap-3">
             {member.linkedin && (
-              <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-neutral-500 hover:text-white transition-colors">
-                <Linkedin size={18} />
-              </a>
+              member.name === 'Jorge Guillen' ? (
+                <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-neutral-500 hover:text-white transition-colors">
+                  <Linkedin size={18} />
+                </a>
+              ) : (
+                <span className="text-neutral-500 cursor-default pointer-events-none">
+                  <Linkedin size={18} />
+                </span>
+              )
             )}
             {member.twitter && (
-              <a href={member.twitter} target="_blank" rel="noopener noreferrer" className="text-neutral-500 hover:text-white transition-colors">
-                <Twitter size={18} />
-              </a>
+              member.name === 'Jorge Guillen' ? (
+                <a href={member.twitter} target="_blank" rel="noopener noreferrer" className="text-neutral-500 hover:text-white transition-colors">
+                  <Twitter size={18} />
+                </a>
+              ) : (
+                <span className="text-neutral-500 cursor-default pointer-events-none">
+                  <Twitter size={18} />
+                </span>
+              )
             )}
           </div>
         )}
