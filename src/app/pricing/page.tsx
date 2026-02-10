@@ -5,7 +5,6 @@ import { MeshGradientClient } from "@/components/ui/mesh-gradient-client"
 import { Check, ArrowRight, Users, Shield, Sparkles, DollarSign } from "lucide-react"
 import SiteHeader from "@/components/ui/site-header"
 import SiteFooter from "@/components/ui/site-footer"
-import { Badge } from "@/components/ui/badge"
 
 const brandFont = { fontFamily: "var(--font-space-grotesk), sans-serif" }
 
@@ -13,11 +12,11 @@ const brandFont = { fontFamily: "var(--font-space-grotesk), sans-serif" }
 const TIERS = [
   {
     name: "Launch",
-    badge: null,
-    badgeStyle: "",
-    users: "1–2 named users",
-    implementation: "$25,000",
-    monthly: "$5,000",
+    title: "Core Capture Deployment",
+    subtitle: "For emerging and mid-size GovCons establishing a modern capture operation.",
+    users: "Includes up to 2 named users",
+    implementation: "$30,000",
+    monthly: "$6,500",
     monthlyLabel: "/month",
     cta: "Request Demo",
     href: "/request-demo",
@@ -26,11 +25,11 @@ const TIERS = [
   },
   {
     name: "Scale",
-    badge: "Founding Customer Offer",
-    badgeStyle: "border-amber-500/30 text-amber-400 bg-amber-500/10",
-    users: "3–5 named users",
-    implementation: "$40,000",
-    monthly: "$9,500",
+    title: "Expanded Capture Operations",
+    subtitle: "For teams running multiple concurrent pursuits across agencies.",
+    users: "Includes up to 5 named users",
+    implementation: "$60,000",
+    monthly: "$12,500",
     monthlyLabel: "/month",
     cta: "Talk to Sales",
     href: "/request-demo",
@@ -39,8 +38,8 @@ const TIERS = [
   },
   {
     name: "Enterprise",
-    badge: null,
-    badgeStyle: "",
+    title: "Enterprise Capture",
+    subtitle: "For large organizations with complex, multi-agency pursuit portfolios.",
     users: "5+ named users",
     implementation: null,
     monthly: null,
@@ -78,16 +77,12 @@ const PRICING_FAQS = [
     a: "No. Never. We do not take a cut of your contract awards, revenue, or profit. No success fees. No revenue share. Your subscription is your only cost — period.",
   },
   {
-    q: "What happens after the founding offer ends?",
-    a: "Founding customers lock in their rate for the duration of their agreement. Once founding seats are filled, new customers will be onboarded at standard pricing. This offer is first-come, first-served.",
-  },
-  {
     q: "Is there a long-term contract?",
     a: "We offer annual agreements with monthly billing. Enterprise tier terms are negotiated individually based on your organization's scale and requirements.",
   },
   {
     q: "How does this compare to building in-house?",
-    a: "Most contractors spend $50K+ per proposal using fragmented tools and manual labor. KaptureOps replaces 6–8 separate systems with one integrated platform — at a fraction of the cost and without the hiring overhead.",
+    a: "Most contractors spend $50K+ per proposal using fragmented tools and manual labor. KaptureOps replaces 6–8 separate systems with one integrated platform — a fraction of the friction, without the hiring overhead.",
   },
 ]
 
@@ -118,7 +113,27 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* ═══ 2) VALUE PILLS ═══ */}
+        {/* ═══ 2) NO REVENUE SHARE CALLOUT ═══ */}
+        <section className="relative w-full px-6 md:px-12 lg:px-20 py-10 md:py-14" style={brandFont}>
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
+          <div className="max-w-3xl mx-auto relative">
+            <div className="rounded-2xl border border-white/[0.08] bg-black/50 p-8 md:p-10 text-center">
+              <p className="text-xl md:text-2xl font-bold text-white tracking-[-0.02em] mb-3">
+                No Revenue Share. Ever.
+              </p>
+              <p className="text-[15px] text-neutral-400 leading-relaxed mb-3 max-w-lg mx-auto">
+                We do not take a percentage of your contract awards.
+                No success fees. No profit share.
+              </p>
+              <p className="text-[15px] text-neutral-300 leading-relaxed max-w-lg mx-auto">
+                KaptureOps is licensed infrastructure — not a broker.
+                You keep 100% of the upside.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══ 3) VALUE PILLS ═══ */}
         <section className="relative w-full px-6 md:px-12 lg:px-20 py-8" style={brandFont}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
           <div className="max-w-4xl mx-auto relative">
@@ -142,24 +157,6 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* ═══ 3) NO PROFIT SHARE CALLOUT ═══ */}
-        <section className="relative w-full px-6 md:px-12 lg:px-20 py-10 md:py-14" style={brandFont}>
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
-          <div className="max-w-3xl mx-auto relative">
-            <div className="rounded-2xl border border-white/[0.08] bg-black/50 p-8 md:p-10 text-center">
-              <p className="text-xl md:text-2xl font-bold text-white tracking-[-0.02em] mb-3">
-                We don&apos;t take a percentage of your contract wins.
-              </p>
-              <p className="text-[15px] text-neutral-400 leading-relaxed mb-4 max-w-lg mx-auto">
-                No profit share. No revenue take. No hidden fees tied to your awards. Your wins are yours.
-              </p>
-              <p className="text-[13px] text-neutral-500 leading-relaxed max-w-md mx-auto">
-                Unlike other platforms in this space, your subscription is your only cost. We succeed when you succeed — not by taxing your success.
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* ═══ 4) PRICING TIERS ═══ */}
         <section className="relative w-full px-6 md:px-12 lg:px-20 py-12 md:py-20" style={brandFont}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
@@ -176,21 +173,20 @@ export default function PricingPage() {
                     }
                   `}
                 >
-                  {/* Badge */}
-                  {tier.badge && (
-                    <Badge className={`self-start mb-4 text-[10px] uppercase tracking-[0.12em] font-medium ${tier.badgeStyle}`}>
-                      {tier.badge}
-                    </Badge>
-                  )}
-
                   {/* Tier name */}
-                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-[-0.02em] mb-2">
+                  <h3 className="text-xl md:text-2xl font-bold text-white tracking-[-0.02em] mb-1">
                     {tier.name}
                   </h3>
+                  <p className="text-sm font-medium text-neutral-300 tracking-[-0.01em] mb-2">
+                    {tier.title}
+                  </p>
+                  <p className="text-[13px] text-neutral-500 leading-relaxed mb-3">
+                    {tier.subtitle}
+                  </p>
 
                   {/* Users */}
                   <div className="flex items-center gap-2 mb-5">
-                    <Users className="h-3.5 w-3.5 text-neutral-500" />
+                    <Users className="h-3.5 w-3.5 text-neutral-500 shrink-0" />
                     <span className="text-sm text-neutral-400">{tier.users}</span>
                   </div>
 
@@ -255,21 +251,12 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* ═══ 5) SCARCITY BAND ═══ */}
+        {/* ═══ 5) EARLY DEPLOYMENT NOTE ═══ */}
         <section className="relative w-full px-6 md:px-12 lg:px-20 py-10 md:py-14" style={brandFont}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
           <div className="max-w-2xl mx-auto relative text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-60" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400" />
-              </span>
-              <p className="text-lg font-semibold text-white tracking-[-0.01em]">
-                Founding customer pricing is limited.
-              </p>
-            </div>
             <p className="text-sm text-neutral-500">
-              Once seats fill, standard pricing applies. Lock in your rate now.
+              Early deployment pricing is limited. Standard pricing applies as capacity fills.
             </p>
           </div>
         </section>
@@ -286,7 +273,7 @@ export default function PricingPage() {
                 What&apos;s Included in Every Tier
               </h2>
               <p className="text-sm text-neutral-500 mt-3">
-                No feature gating. No module restrictions. Every customer gets the complete platform.
+                Every customer receives the full KaptureOps AI platform. All modules. All capabilities. No feature tiers.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
