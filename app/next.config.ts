@@ -4,6 +4,8 @@ import type { NextConfig } from "next";
 const root = process.cwd();
 
 const nextConfig: NextConfig = {
+  basePath: "/app",
+  assetPrefix: "/app",
   outputFileTracingRoot: root,
   images: {
     remotePatterns: [

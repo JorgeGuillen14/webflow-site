@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { MeshGradient } from "@paper-design/shaders-react"
+import { MeshGradientClient } from "@/components/ui/mesh-gradient-client"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
@@ -147,7 +147,7 @@ function BioPopup({ member, onClose }: { member: TeamMember; onClose: () => void
 function ShaderBackground() {
   return (
     <div className="fixed inset-0 z-0">
-      <MeshGradient
+      <MeshGradientClient
         className="w-full h-full"
         colors={["#000000", "#1a1a1a", "#333333", "#ffffff"]}
         speed={0.6}

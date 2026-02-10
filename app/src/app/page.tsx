@@ -7,7 +7,7 @@ import { Spotlight } from "@/components/ui/spotlight"
 import { GlowingEffect } from "@/components/ui/glowing-effect"
 import { VelarixGooBlob } from "@/components/ui/velarix-goo-blob"
 import { cn } from "@/lib/utils"
-import { MeshGradient } from "@paper-design/shaders-react"
+import { MeshGradientClient } from "@/components/ui/mesh-gradient-client"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { ContextBox } from "@/components/ui/context-box"
@@ -76,14 +76,17 @@ function MagneticButton({
   )
 }
 
-// ─── SCROLL ANIMATIONS HOOK ──────────────────────────────────
+// ─── SCROLL ANIMATIONS HOOK (deferred so hero paints first) ───
 function useScrollAnimations() {
   useEffect(() => {
-    // Smooth scroll behavior
-    document.documentElement.style.scrollBehavior = "smooth"
+    let cancelled = false
+    const run = () => {
+      if (cancelled) return
+      // Smooth scroll behavior
+      document.documentElement.style.scrollBehavior = "smooth"
 
-    // ── Hero goo blob — scale up from center
-    gsap.fromTo(
+      // ── Hero goo blob — scale up from center
+      gsap.fromTo(
       ".gsap-hero-content",
       { opacity: 0, scale: 0.85, y: 30 },
       { opacity: 1, scale: 1, y: 0, duration: 1.2, ease: "power3.out", delay: 0.2 }
@@ -206,6 +209,25 @@ function useScrollAnimations() {
     return () => {
       document.documentElement.style.scrollBehavior = ""
       ScrollTrigger.getAll().forEach((t: { kill: () => void }) => t.kill())
+    }
+    }
+
+    let scrollCleanup: (() => void) | undefined
+    const schedule =
+      typeof requestIdleCallback !== "undefined"
+        ? requestIdleCallback(() => {
+            if (!cancelled) scrollCleanup = run()
+          }, { timeout: 500 })
+        : 0
+    const t = setTimeout(() => {
+      if (!cancelled && !scrollCleanup) scrollCleanup = run()
+    }, 500)
+    return () => {
+      cancelled = true
+      if (typeof schedule === "number" && schedule !== 0 && typeof cancelIdleCallback !== "undefined")
+        cancelIdleCallback(schedule)
+      clearTimeout(t)
+      scrollCleanup?.()
     }
   }, [])
 }
@@ -348,29 +370,43 @@ function Header() {
   )
 }
 
-// ─── LAZY SPLINE (loads after page renders, follows cursor) ──
+// ─── LAZY SPLINE (loads when hero 3D area is in view + dynamic import) ──
 function LazySpline() {
   const [showSpline, setShowSpline] = useState(false)
+  const [SplineScene, setSplineScene] = useState<React.ComponentType<{ scene: string; className?: string }> | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSpline(true), 100)
-    return () => clearTimeout(timer)
+    const el = containerRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) setShowSpline(true)
+      },
+      { rootMargin: "100px", threshold: 0.1 }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
   }, [])
 
-  if (!showSpline) {
-    return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-      </div>
-    )
-  }
+  useEffect(() => {
+    if (!showSpline) return
+    import("@/components/ui/splite").then((m) => setSplineScene(() => m.SplineScene))
+  }, [showSpline])
 
-  const { SplineScene } = require("@/components/ui/splite")
   return (
-    <SplineScene
-      scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-      className="w-full h-full"
-    />
+    <div ref={containerRef} className="w-full h-full min-h-[320px]">
+      {!showSpline || !SplineScene ? (
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+        </div>
+      ) : (
+        <SplineScene
+          scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+          className="w-full h-full"
+        />
+      )}
+    </div>
   )
 }
 
@@ -378,7 +414,7 @@ function LazySpline() {
 function ShaderBackground() {
   return (
     <div className="fixed inset-0 z-0 pointer-events-none">
-      <MeshGradient
+      <MeshGradientClient
         className="w-full h-full"
         colors={["#000000", "#1a1a1a", "#333333", "#ffffff"]}
         speed={0.6}
@@ -494,7 +530,7 @@ function HeroSection() {
       />
 
       {/* ── GOO BLOB — brand anchor ── */}
-      <div className="gsap-hero-content relative z-10 flex flex-col items-center justify-center text-center -mt-8 md:-mt-12 -mb-16 md:-mb-24">
+      <div className="gsap-hero-content relative z-10 flex flex-col items-center justify-center text-center -mt-8 md:-mt-12 -mb-12 md:-mb-20">
         <VelarixGooBlob size={380} />
       </div>
 
@@ -586,7 +622,7 @@ function FocusSection() {
   ]
 
   return (
-    <section id="focus" className="relative w-full px-6 md:px-12 lg:px-20 pt-10 pb-12 md:pt-14 md:pb-16">
+    <section id="focus" className="relative w-full px-6 md:px-12 lg:px-20 pt-8 pb-10 md:pt-12 md:pb-14">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
       <div className="max-w-6xl mx-auto relative text-center">
         <div className="gsap-focus-heading mb-8">
@@ -667,10 +703,10 @@ function HowWeHelpStrip() {
   ]
 
   return (
-    <section className="relative w-full px-6 md:px-12 lg:px-20 pt-4 pb-8 md:pt-6 md:pb-10">
+    <section className="relative w-full px-6 md:px-12 lg:px-20 pt-2 pb-6 md:pt-4 md:pb-8">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
       <div className="max-w-6xl mx-auto relative text-center">
-        <div className="gsap-help-heading mb-5">
+        <div className="gsap-help-heading mb-4">
           <p className="text-[11px] uppercase tracking-[0.25em] text-neutral-500 mb-1.5 font-medium">
             How We Help
           </p>
@@ -772,10 +808,10 @@ function FinalCTABand_OLD() {
 // ─── KAPTUREOPS AI CALLOUT — small reference card ───────────
 function KaptureOpsCallout() {
   return (
-    <section className="relative w-full px-6 md:px-12 lg:px-20 pt-6 pb-8 md:pt-8 md:pb-12">
+    <section className="relative w-full px-6 md:px-12 lg:px-20 pt-4 pb-6 md:pt-6 md:pb-10">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
       <div className="max-w-6xl mx-auto relative">
-        <div className="h-px w-full bg-white/[0.06] mb-8" />
+        <div className="h-px w-full bg-white/[0.06] mb-6" />
         <div className="gsap-kops-callout">
           <div className="relative rounded-[1.25rem] border-[0.75px] border-border p-2 md:rounded-[1.5rem] md:p-3">
             <GlowingEffect
@@ -860,11 +896,12 @@ const FALLBACK_STATS: StatData[] = [
   },
 ]
 
-function useGovConStats() {
+function useGovConStats(enabled: boolean) {
   const [stats, setStats] = useState<StatData[]>(FALLBACK_STATS)
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
+    if (!enabled) return
     let cancelled = false
 
     async function fetchStats() {
@@ -913,7 +950,7 @@ function useGovConStats() {
 
     fetchStats()
     return () => { cancelled = true }
-  }, [])
+  }, [enabled])
 
   return { stats, loaded }
 }
@@ -984,9 +1021,22 @@ function StatCard({ stat, loaded }: { stat: StatData; loaded: boolean }) {
 }
 
 function GovConStats() {
-  const { stats, loaded } = useGovConStats()
+  const sectionRef = useRef<HTMLElement>(null)
+  const [inView, setInView] = useState(false)
+  const { stats, loaded } = useGovConStats(inView)
   const containerRef = useRef<HTMLDivElement>(null)
   const hasAnimated = useRef(false)
+
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      (entries) => { if (entries[0]?.isIntersecting) setInView(true) },
+      { rootMargin: "80px", threshold: 0 }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
 
   useEffect(() => {
     if (!loaded || hasAnimated.current) return
@@ -1005,7 +1055,7 @@ function GovConStats() {
   }, [loaded])
 
   return (
-    <section className="relative w-full px-6 md:px-12 lg:px-20 pt-6 pb-10 md:pt-8 md:pb-14">
+    <section ref={sectionRef} className="relative w-full px-6 md:px-12 lg:px-20 pt-6 pb-10 md:pt-8 md:pb-14">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
       <div className="max-w-6xl mx-auto relative" ref={containerRef}>
         <div className="h-px w-full bg-white/[0.06] mb-8" />
@@ -1031,7 +1081,7 @@ function GovConStats() {
 // ─── COMPACT FINAL CTA ──────────────────────────────────────
 function FinalCTA() {
   return (
-    <section id="contact" className="relative w-full px-6 md:px-12 lg:px-20 pt-4 pb-12 md:pt-6 md:pb-16">
+    <section id="contact" className="relative w-full px-6 md:px-12 lg:px-20 pt-4 pb-10 md:pt-6 md:pb-14">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" aria-hidden="true" />
       <div className="max-w-6xl mx-auto relative">
         <div className="gsap-final-cta flex flex-col md:flex-row md:items-center md:justify-between gap-8 md:gap-12">
@@ -1082,7 +1132,7 @@ export default function Home_OLD() {
     <main className="dark min-h-screen bg-black relative cursor-none md:cursor-none">
       <ShaderBackground />
       <Header />
-      <div className="relative z-10 pt-20">
+      <div className="relative z-10 pt-16">
         <HeroSection />
         <FeaturesSection />
         <CTASection />
@@ -1104,7 +1154,7 @@ export default function Home() {
     <main className="dark min-h-screen bg-black relative cursor-none md:cursor-none">
       <ShaderBackground />
       <Header />
-      <div className="relative z-10 pt-20">
+      <div className="relative z-10 pt-16">
         <HeroSection />
         <FocusSection />
         <HowWeHelpStrip />

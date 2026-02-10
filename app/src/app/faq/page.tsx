@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { MeshGradient } from "@paper-design/shaders-react"
+import { MeshGradientClient } from "@/components/ui/mesh-gradient-client"
 import { ChevronDown } from "lucide-react"
 import SiteHeader from "@/components/ui/site-header"
 import SiteFooter from "@/components/ui/site-footer"
@@ -115,7 +115,7 @@ export default function FAQPage() {
   return (
     <main className="dark min-h-screen bg-black relative">
       <div className="fixed inset-0 z-0">
-        <MeshGradient className="w-full h-full" colors={["#000000", "#1a1a1a", "#333333", "#ffffff"]} speed={0.6} distortion={0.8} swirl={0.1} />
+        <MeshGradientClient className="w-full h-full" colors={["#000000", "#1a1a1a", "#333333", "#ffffff"]} speed={0.6} distortion={0.8} swirl={0.1} />
       </div>
       <SiteHeader />
 

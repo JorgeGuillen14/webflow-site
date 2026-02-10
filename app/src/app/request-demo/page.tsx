@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { MeshGradient } from "@paper-design/shaders-react"
+import { MeshGradientClient } from "@/components/ui/mesh-gradient-client"
 import { ArrowRight, Check, Shield, Cloud, Lock } from "lucide-react"
 import SiteHeader from "@/components/ui/site-header"
 import SiteFooter from "@/components/ui/site-footer"
@@ -206,7 +206,8 @@ export default function RequestDemoPage() {
           landing_page: typeof window !== "undefined" ? window.location.href : null,
         },
       }
-      const res = await fetch("/api/leads/request-demo", {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "/app"
+      const res = await fetch(`${basePath}/api/leads/request-demo`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -231,7 +232,7 @@ export default function RequestDemoPage() {
     <main className="dark min-h-screen bg-black relative" style={brandFont}>
       {/* Shader background — same as homepage */}
       <div className="fixed inset-0 z-0">
-        <MeshGradient className="w-full h-full" colors={["#000000", "#1a1a1a", "#333333", "#ffffff"]} speed={0.6} distortion={0.8} swirl={0.1} />
+        <MeshGradientClient className="w-full h-full" colors={["#000000", "#1a1a1a", "#333333", "#ffffff"]} speed={0.6} distortion={0.8} swirl={0.1} />
       </div>
 
       <SiteHeader activePage="request-demo" />
