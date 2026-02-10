@@ -185,6 +185,23 @@ export function RadialOrbitalTimeline({
     resizeCanvas()
     window.addEventListener("resize", resizeCanvas)
 
+    // When the left column shrinks (card open), container resizes — update canvas + particles so diagram stays in sync
+    const resizeObserver = new ResizeObserver(() => {
+      const container = containerRef.current
+      if (!container) return
+      const rect = container.getBoundingClientRect()
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      canvas.width = rect.width * dpr
+      canvas.height = rect.height * dpr
+      canvas.style.width = `${rect.width}px`
+      canvas.style.height = `${rect.height}px`
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      sizeRef.current = { w: rect.width, h: rect.height }
+      const pCount = isMobileRef.current ? 18 : 45
+      particlesRef.current = createParticles(pCount, rect.width, rect.height, colors)
+    })
+    resizeObserver.observe(containerRef.current!)
+
     const tick = () => {
       if (!mountedRef.current) return
       const paused = isPausedRef.current
@@ -303,6 +320,7 @@ export function RadialOrbitalTimeline({
     return () => {
       cancelAnimationFrame(animRef.current)
       window.removeEventListener("resize", resizeCanvas)
+      resizeObserver.disconnect()
     }
   }, [colors, computePosition, timelineData])
 
@@ -363,11 +381,11 @@ export function RadialOrbitalTimeline({
   }, [timelineData.length])
 
   return (
-    <div className="w-full flex flex-col md:flex-row items-center md:items-stretch gap-6 md:gap-0" style={brandFont}>
-      {/* ── Left: Orb visualization area ── */}
+    <div className="w-full flex flex-col md:flex-row items-center md:items-stretch gap-6 md:gap-10" style={brandFont}>
+      {/* ── Left: Orb visualization area (never covered by card) ── */}
       <div className={cn(
-        "w-full transition-all duration-500",
-        selectedItem ? "md:w-[58%]" : "md:w-full"
+        "w-full min-w-0 transition-all duration-500",
+        selectedItem ? "md:flex-1 md:min-w-0" : "md:flex-none md:w-full"
       )}>
         <div
           ref={containerRef}
@@ -569,10 +587,10 @@ export function RadialOrbitalTimeline({
         </div>
       </div>
 
-      {/* ── Right: Detail panel (inline, never covers orbs) ── */}
+      {/* ── Right: Detail panel — always beside diagram, never over orbs ── */}
       <div className={cn(
-        "w-full md:w-[42%] flex items-center justify-center transition-all duration-500 min-h-[200px] md:min-h-0",
-        !selectedItem && "md:w-0 md:overflow-hidden md:opacity-0"
+        "w-full flex items-center justify-center transition-all duration-500 min-h-[200px] md:min-h-0 md:shrink-0",
+        selectedItem ? "md:w-[380px] md:flex-none" : "md:w-0 md:overflow-hidden md:opacity-0 md:min-w-0"
       )}>
         {selectedItem ? (
           <div
